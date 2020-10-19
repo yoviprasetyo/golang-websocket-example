@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.title}}</title>
+  <style>
+    .d-none {
+        display: none;
+    }
+    .full-width {
+        width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="chat" class="d-none">
+      <div id="container"></div>
+      <div id="form">
+        <form action="/message" method="post">
+          <input id="message" type="text" placeholder="Tulis Pesan di sini">
+          <button type="submit">Kirim</button>
+        </form>
+      </div>
+    </div>
+    <div id="login">
+      <form id="form-login" action="/login" method="post">
+        <input id="username" type="text" placeholder="Username">
+        <input id="password" type="password" placeholder="Password">
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+  <script>
+  const app = document.querySelector('#app')
+  const loginContainer = document.querySelector('#login')
+  const chatContainer = document.querySelector('#chat')
+  const formLogin = document.querySelector('#form-login')
+
+  var token, username
+
+  const login = async() => {
+      let body = JSON.stringify({
+          username: document.querySelector('#username').value,
+          password: document.querySelector('#password').value
+      })
+      let request = await fetch(formLogin.getAttribute('action'), {
+          method: 'POST',
+          headers: {
+              'Content-type': 'application/json'
+          },
+          body
+      })
+      .then(response => response.json())
+      .then(json => {
+          if( json.ok == true ) {
+              username = json.data.username
+              toggleLogin()
+              return
+          }
+          if( json.error != undefined ) {
+              alert(json.error)
+              return
+          }
+      })
+      .catch(error => alert(error))
+  }
+
+  const getCredentials = async() => {
+      let request = await fetch("/me", {
+          headers: {
+              'Content-type': 'application/json'
+          }
+      })
+      .then(response => response.json())
+      .then(json => {
+          if( json.ok == true ) {
+              username = json.data.username
+              toggleLogin()
+              return
+          }
+
+          if( json.error != undefined ) {
+              alert(json.error)
+          }
+      })
+      .catch(error => alert(error))
+  }
+
+  formLogin.addEventListener('submit', ev => {
+      ev.preventDefault()
+      login()
+  })
+
+  const toggleLogin = () => {
+      if( loginContainer.classList.contains('d-none') ) {
+        loginContainer.classList.remove('d-none')
+        chatContainer.classList.add('d-none')
+      } else {
+        loginContainer.classList.add('d-none')
+        chatContainer.classList.remove('d-none')
+      }
+  }
+  
+  </script>
+</body>
+</html>
